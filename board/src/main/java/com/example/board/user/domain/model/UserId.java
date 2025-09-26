@@ -25,9 +25,14 @@ public class UserId {
         return value;
     }
 
+
+
+
+
+
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
+        if (this == obj) return true;// 추가하자
         if (obj == null || getClass() != obj.getClass()) return false;
         UserId userId = (UserId) obj;
         return Objects.equals(value, userId.value);
@@ -35,7 +40,7 @@ public class UserId {
 
     @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return Objects.hash(value); //hashcode가 아니라 hash 쓰기 그래야 확장성이 좋음.
     }
 
     @Override
