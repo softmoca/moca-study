@@ -2,9 +2,12 @@ package com.example.board.user.infrastructure.repository;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.example.board.user.domain.model.*;
+import lombok.*;
+
 
 @Entity
-@Table(name = "users")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity {
 
     @Id
@@ -21,7 +24,7 @@ public class UserEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRole role;
+    private UserEntityRole role;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -32,12 +35,11 @@ public class UserEntity {
     @Column(nullable = false)
     private Boolean active;
 
-    // 기본 생성자
-    protected UserEntity() {}
 
-    // 생성자
+
+    // 생성자는 수동으로 작성
     public UserEntity(String userId, String email, String username, String password,
-                      UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean active) {
+                      UserEntityRole role, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean active) {
         this.userId = userId;
         this.email = email;
         this.username = username;
@@ -49,13 +51,13 @@ public class UserEntity {
     }
 
     // 도메인 모델로 변환
-    public com.example.board.user.domain.model.User toDomain() {
-        return new com.example.board.user.domain.model.User(
-                com.example.board.user.domain.model.UserId.of(this.userId),
-                com.example.board.user.domain.model.Email.of(this.email),
+    public User toDomain() {
+        return new User(
+                UserId.of(this.userId),
+                Email.of(this.email),
                 this.username,
-                com.example.board.user.domain.model.Password.createEncoded(this.password),
-                com.example.board.user.domain.model.UserRole.valueOf(this.role.name()),
+                Password.createEncoded(this.password),
+                mapToDomainRole(this.role),
                 this.createdAt,
                 this.updatedAt,
                 this.active
@@ -63,46 +65,32 @@ public class UserEntity {
     }
 
     // 도메인 모델에서 변환
-    public static UserEntity fromDomain(com.example.board.user.domain.model.User user) {
+    public static UserEntity fromDomain(User user) {
         return new UserEntity(
                 user.getUserId().getValue(),
                 user.getEmail().getValue(),
                 user.getUsername(),
                 user.getPassword().getValue(),
-                UserRole.valueOf(user.getRole().name()),
+                mapToEntityRole(user.getRole()),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.isActive()
         );
     }
 
-    // Getter/Setter 메서드들
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public UserRole getRole() { return role; }
-    public void setRole(UserRole role) { this.role = role; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-
-    public Boolean getActive() { return active; }
-    public void setActive(Boolean active) { this.active = active; }
-
-    // JPA Entity용 UserRole enum
-    public enum UserRole {
-        ADMIN, USER
+    // 역할 매핑 메서드들
+    private static UserRole mapToDomainRole(UserEntityRole entityRole) {
+        return switch (entityRole) {
+            case ADMIN -> UserRole.ADMIN;
+            case USER -> UserRole.USER;
+        };
     }
+
+    private static UserEntityRole mapToEntityRole(UserRole domainRole) {
+        return switch (domainRole) {
+            case ADMIN -> UserEntityRole.ADMIN;
+            case USER -> UserEntityRole.USER;
+        };
+    }
+
 }
