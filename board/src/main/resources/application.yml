@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/testDb
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        use_sql_comments: true # SQL? JPQL ?? ??
+        format_sql: true # ??? ??? SQL? ???(???/????) ??
+        highlight_sql: true # ????
+
+logging.level:
+  org.hibernate.SQL: debug # SQL ??
+  org.hibernate.orm.jdbc.bind: trace # ????
