@@ -5,26 +5,19 @@ import com.example.board.board.domain.model.BoardId;
 import com.example.board.board.domain.repository.BoardRepository;
 import com.example.board.board.infrastructure.entity.BoardEntity;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-interface JpaBoardEntityRepository extends JpaRepository<BoardEntity, String> {
-    @Query("SELECT b FROM BoardEntity b WHERE b.active = true ORDER BY b.createdAt DESC")
-    List<BoardEntity> findAllActive();
-    boolean existsByName(String name);
-}
 
 @Repository
-public class JpaBoardRepository implements BoardRepository {
+public class BoardRepositoryImpl implements BoardRepository {
 
-    private final JpaBoardEntityRepository jpaRepository;
+    private final BoardJpaRepository jpaRepository;
 
-    public JpaBoardRepository(JpaBoardEntityRepository jpaRepository) {
+    public BoardRepositoryImpl(BoardJpaRepository jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
 
@@ -37,7 +30,8 @@ public class JpaBoardRepository implements BoardRepository {
 
     @Override
     public Optional<Board> findById(BoardId boardId) {
-        return jpaRepository.findById(boardId.getValue())
+        // BoardId(UUID)로 조회 - publicId 컬럼에서 찾음
+        return jpaRepository.findByPublicId(boardId.getValue())
                 .map(BoardEntity::toDomain);
     }
 

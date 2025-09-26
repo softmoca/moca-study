@@ -6,28 +6,18 @@ import com.example.board.comment.infrastructure.entity.CommentEntity;
 import com.example.board.board.domain.model.PostId;
 import com.example.board.user.domain.model.UserId;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-interface JpaCommentEntityRepository extends JpaRepository<CommentEntity, String> {
-    List<CommentEntity> findByPostIdOrderByCreatedAtAsc(String postId);
-    List<CommentEntity> findByPostIdAndStatusOrderByCreatedAtAsc(String postId, CommentEntity.CommentStatus status);
-    List<CommentEntity> findByParentCommentIdOrderByCreatedAtAsc(String parentCommentId);
-    List<CommentEntity> findByAuthorIdOrderByCreatedAtDesc(String authorId);
-    long countByPostId(String postId);
-    long countByAuthorId(String authorId);
-}
-
 @Repository
-public class JpaCommentRepository implements CommentRepository {
+public class CommentRepositoryImpl implements CommentRepository {
 
-    private final JpaCommentEntityRepository jpaRepository;
+    private final CommentJpaRepository jpaRepository;
 
-    public JpaCommentRepository(JpaCommentEntityRepository jpaRepository) {
+    public CommentRepositoryImpl(CommentJpaRepository jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
 

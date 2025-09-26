@@ -1,4 +1,4 @@
-package com.example.board.user.infrastructure.repository;
+package com.example.board.user.infrastructure.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -11,7 +11,12 @@ import lombok.*;
 public class UserEntity {
 
     @Id
-    private String userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;  // DB 최적화용 Auto Increment
+
+
+    @Column(name = "public_id", unique = true, nullable = false)
+    private String publicId;  // 외부 노출용 UUID (UserId의 값)
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -38,9 +43,10 @@ public class UserEntity {
 
 
     // 생성자는 수동으로 작성
-    public UserEntity(String userId, String email, String username, String password,
-                      UserEntityRole role, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean active) {
-        this.userId = userId;
+    public UserEntity(String publicId, String email, String username, String password,
+                      UserEntityRole role, LocalDateTime createdAt,
+                      LocalDateTime updatedAt, Boolean active) {
+        this.publicId = publicId;
         this.email = email;
         this.username = username;
         this.password = password;
@@ -50,10 +56,10 @@ public class UserEntity {
         this.active = active;
     }
 
-    // 도메인 모델로 변환
+    // 도메인 모델로 변환 - publicId 사용
     public User toDomain() {
         return new User(
-                UserId.of(this.userId),
+                UserId.of(this.publicId),  // publicId를 UserId로 변환
                 Email.of(this.email),
                 this.username,
                 Password.createEncoded(this.password),
@@ -64,10 +70,10 @@ public class UserEntity {
         );
     }
 
-    // 도메인 모델에서 변환
+    // 도메인 모델에서 변환 - UserId의 값을 publicId로 설정
     public static UserEntity fromDomain(User user) {
         return new UserEntity(
-                user.getUserId().getValue(),
+                user.getUserId().getValue(),  // UserId의 값을 publicId로
                 user.getEmail().getValue(),
                 user.getUsername(),
                 user.getPassword().getValue(),
@@ -77,6 +83,7 @@ public class UserEntity {
                 user.isActive()
         );
     }
+
 
     // 역할 매핑 메서드들
     private static UserRole mapToDomainRole(UserEntityRole entityRole) {

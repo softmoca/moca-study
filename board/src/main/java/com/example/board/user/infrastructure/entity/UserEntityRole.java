@@ -1,4 +1,4 @@
-package com.example.board.user.infrastructure.repository;
+package com.example.board.user.infrastructure.entity;
 
 public enum UserEntityRole {
     ADMIN("관리자"),

@@ -28,8 +28,6 @@ public class UserId {
 
 
 
-
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;// 추가하자

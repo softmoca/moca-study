@@ -6,6 +6,7 @@ import com.example.board.user.domain.model.UserId;
 import com.example.board.user.domain.repository.UserRepository;
 
 
+import com.example.board.user.infrastructure.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -28,7 +29,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findById(UserId userId) {
-        return jpaRepository.findById(userId.getValue())
+        return jpaRepository.findByPublicId(userId.getValue())
                 .map(UserEntity::toDomain);
     }
 
