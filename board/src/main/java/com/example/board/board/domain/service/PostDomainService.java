@@ -10,18 +10,16 @@ import com.example.board.user.domain.model.UserId;
 import com.example.board.common.exception.BusinessException;
 import com.example.board.common.exception.EntityNotFoundException;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PostDomainService {
 
     private final BoardRepository boardRepository;
     private final PostRepository postRepository;
 
-    public PostDomainService(BoardRepository boardRepository, PostRepository postRepository) {
-        this.boardRepository = boardRepository;
-        this.postRepository = postRepository;
-    }
 
     public void validatePostCreation(BoardId boardId, UserId authorId) {
         // 게시판 존재 여부 및 활성 상태 확인

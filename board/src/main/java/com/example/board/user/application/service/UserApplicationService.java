@@ -12,24 +12,18 @@ import com.example.board.user.domain.repository.UserRepository;
 import com.example.board.user.domain.service.UserDomainService;
 import com.example.board.common.util.PasswordEncoder;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class UserApplicationService implements CreateUserUseCase {
 
     private final UserRepository userRepository;
     private final UserDomainService userDomainService;
     private final PasswordEncoder passwordEncoder;
-
-    public UserApplicationService(UserRepository userRepository,
-                                  UserDomainService userDomainService,
-                                  PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.userDomainService = userDomainService;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public UserResponse createUser(UserCreateRequest request) {

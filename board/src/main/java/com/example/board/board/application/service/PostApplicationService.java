@@ -11,6 +11,7 @@ import com.example.board.user.domain.repository.UserRepository;
 import com.example.board.common.exception.BusinessException;
 import com.example.board.common.exception.EntityNotFoundException;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,19 +20,13 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PostApplicationService implements CreatePostUseCase, UpdatePostUseCase, GetPostListUseCase {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostDomainService postDomainService;
 
-    public PostApplicationService(PostRepository postRepository,
-                                  UserRepository userRepository,
-                                  PostDomainService postDomainService) {
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.postDomainService = postDomainService;
-    }
 
     @Override
     public PostResponse createPost(PostCreateRequest request, String authorId) {

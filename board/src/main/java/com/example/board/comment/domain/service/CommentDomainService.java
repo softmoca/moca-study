@@ -10,18 +10,16 @@ import com.example.board.user.domain.model.UserId;
 import com.example.board.common.exception.BusinessException;
 import com.example.board.common.exception.EntityNotFoundException;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CommentDomainService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
-    public CommentDomainService(CommentRepository commentRepository, PostRepository postRepository) {
-        this.commentRepository = commentRepository;
-        this.postRepository = postRepository;
-    }
 
     public void validateCommentCreation(PostId postId, UserId authorId) {
         // 게시글 존재 여부 및 댓글 작성 가능 상태 확인

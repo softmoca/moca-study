@@ -12,6 +12,7 @@ import com.example.board.user.domain.repository.UserRepository;
 import com.example.board.common.exception.BusinessException;
 import com.example.board.common.exception.EntityNotFoundException;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,19 +22,14 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CommentApplicationService implements CreateCommentUseCase, UpdateCommentUseCase {
 
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final CommentDomainService commentDomainService;
 
-    public CommentApplicationService(CommentRepository commentRepository,
-                                     UserRepository userRepository,
-                                     CommentDomainService commentDomainService) {
-        this.commentRepository = commentRepository;
-        this.userRepository = userRepository;
-        this.commentDomainService = commentDomainService;
-    }
+
 
     @Override
     public CommentResponse createComment(CommentCreateRequest request, String authorId) {

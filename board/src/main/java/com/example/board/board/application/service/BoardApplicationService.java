@@ -7,6 +7,7 @@ import com.example.board.board.domain.repository.BoardRepository;
 import com.example.board.board.domain.repository.PostRepository;
 import com.example.board.common.exception.EntityNotFoundException;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,16 +16,12 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class BoardApplicationService {
 
     private final BoardRepository boardRepository;
     private final PostRepository postRepository;
 
-    public BoardApplicationService(BoardRepository boardRepository,
-                                   PostRepository postRepository) {
-        this.boardRepository = boardRepository;
-        this.postRepository = postRepository;
-    }
 
     public List<BoardResponse> getAllBoards() {
         List<Board> boards = boardRepository.findAllActive();
