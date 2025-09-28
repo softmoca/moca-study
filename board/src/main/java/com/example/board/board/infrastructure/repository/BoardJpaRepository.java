@@ -7,11 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-interface BoardJpaRepository extends JpaRepository<BoardEntity, String> {
+interface BoardJpaRepository extends JpaRepository<BoardEntity, Long> {
     // publicId로 조회하는 메서드들 추가
     Optional<BoardEntity> findByPublicId(String publicId);
 
     @Query("SELECT b FROM BoardEntity b WHERE b.active = true ORDER BY b.createdAt DESC")
     List<BoardEntity> findAllActive();
+
     boolean existsByName(String name);
 }

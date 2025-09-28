@@ -31,7 +31,8 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public Optional<Post> findById(PostId postId) {
-        return jpaRepository.findById(postId.getValue())
+        // PostId(UUID)로 조회 - publicId 컬럼에서 찾음
+        return jpaRepository.findByPublicId(postId.getValue())
                 .map(PostEntity::toDomain);
     }
 
@@ -75,7 +76,9 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public void deleteById(PostId postId) {
-        jpaRepository.deleteById(postId.getValue());
+        // publicId로 삭제하려면 먼저 엔티티를 찾아서 삭제해야 함
+        jpaRepository.findByPublicId(postId.getValue())
+                .ifPresent(jpaRepository::delete);
     }
 
     @Override
@@ -85,6 +88,6 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public long countByAuthorId(UserId authorId) {
-        return jpaRepository.countByBoardPublicId(authorId.getValue());
+        return jpaRepository.countByAuthorPublicId(authorId.getValue());
     }
 }

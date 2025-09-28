@@ -9,10 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-interface PostJpaRepository extends JpaRepository<PostEntity, String> {
+interface PostJpaRepository extends JpaRepository<PostEntity, Long> {
 
-
-
+    // publicId로 조회하는 메서드 추가
     Optional<PostEntity> findByPublicId(String publicId);
 
     // Board의 publicId로 Post들을 찾는 메서드들
@@ -21,9 +20,6 @@ interface PostJpaRepository extends JpaRepository<PostEntity, String> {
 
     // Author의 publicId로 Post들을 찾는 메서드
     List<PostEntity> findByAuthorPublicIdOrderByCreatedAtDesc(String authorPublicId);
-
-
-
 
     @Query("SELECT p FROM PostEntity p WHERE p.status = 'PUBLISHED' ORDER BY p.createdAt DESC")
     List<PostEntity> findRecentPublishedPosts(PageRequest pageRequest);
@@ -34,5 +30,3 @@ interface PostJpaRepository extends JpaRepository<PostEntity, String> {
     long countByBoardPublicId(String boardPublicId);
     long countByAuthorPublicId(String authorPublicId);
 }
-
-

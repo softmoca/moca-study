@@ -2,28 +2,36 @@ package com.example.board.comment.infrastructure.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "comments")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentEntity {
 
     @Id
-    private String commentId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;  // DB 최적화용 Auto Increment
 
-    @Column(nullable = false)
-    private String postId;
+    @Column(name = "public_id", unique = true, nullable = false)
+    private String publicId;  // 외부 노출용 UUID (CommentId의 값)
 
-    @Column(nullable = false)
-    private String authorId;
+    @Column(name = "post_public_id", nullable = false)
+    private String postPublicId;  // PostId의 값
+
+    @Column(name = "author_public_id", nullable = false)
+    private String authorPublicId;  // UserId의 값
 
     @Column(nullable = false, length = 1000)
     private String content;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CommentStatus status;
+    private CommentEntityStatus status;
 
-    private String parentCommentId;
+    @Column(name = "parent_comment_public_id")
+    private String parentCommentPublicId;  // 부모 CommentId의 값
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -31,79 +39,62 @@ public class CommentEntity {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // 기본 생성자
-    protected CommentEntity() {}
-
     // 생성자
-    public CommentEntity(String commentId, String postId, String authorId, String content,
-                         CommentStatus status, String parentCommentId,
+    public CommentEntity(String publicId, String postPublicId, String authorPublicId,
+                         String content, CommentEntityStatus status, String parentCommentPublicId,
                          LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.commentId = commentId;
-        this.postId = postId;
-        this.authorId = authorId;
+        this.publicId = publicId;
+        this.postPublicId = postPublicId;
+        this.authorPublicId = authorPublicId;
         this.content = content;
         this.status = status;
-        this.parentCommentId = parentCommentId;
+        this.parentCommentPublicId = parentCommentPublicId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
-    // 도메인 모델로 변환
+    // 도메인 모델로 변환 - publicId 사용
     public com.example.board.comment.domain.model.Comment toDomain() {
         return new com.example.board.comment.domain.model.Comment(
-                com.example.board.comment.domain.model.CommentId.of(this.commentId),
-                com.example.board.board.domain.model.PostId.of(this.postId),
-                com.example.board.user.domain.model.UserId.of(this.authorId),
+                com.example.board.comment.domain.model.CommentId.of(this.publicId),
+                com.example.board.board.domain.model.PostId.of(this.postPublicId),
+                com.example.board.user.domain.model.UserId.of(this.authorPublicId),
                 com.example.board.comment.domain.model.CommentContent.of(this.content),
-                com.example.board.comment.domain.model.CommentStatus.valueOf(this.status.name()),
-                this.parentCommentId != null ?
-                        com.example.board.comment.domain.model.CommentId.of(this.parentCommentId) : null,
+                mapToDomainStatus(this.status),
+                this.parentCommentPublicId != null ?
+                        com.example.board.comment.domain.model.CommentId.of(this.parentCommentPublicId) : null,
                 this.createdAt,
                 this.updatedAt
         );
     }
 
-    // 도메인 모델에서 변환
+    // 도메인 모델에서 변환 - ID 값들을 publicId로 설정
     public static CommentEntity fromDomain(com.example.board.comment.domain.model.Comment comment) {
         return new CommentEntity(
-                comment.getCommentId().getValue(),
-                comment.getPostId().getValue(),
-                comment.getAuthorId().getValue(),
+                comment.getCommentId().getValue(),  // CommentId의 값을 publicId로
+                comment.getPostId().getValue(),     // PostId의 값을 postPublicId로
+                comment.getAuthorId().getValue(),   // UserId의 값을 authorPublicId로
                 comment.getContent().getValue(),
-                CommentStatus.valueOf(comment.getStatus().name()),
-                comment.getParentCommentId() != null ? comment.getParentCommentId().getValue() : null,
+                mapToEntityStatus(comment.getStatus()),
+                comment.getParentCommentId() != null ?
+                        comment.getParentCommentId().getValue() : null,  // 부모 CommentId의 값
                 comment.getCreatedAt(),
                 comment.getUpdatedAt()
         );
     }
 
-    // JPA Entity용 CommentStatus enum
-    public enum CommentStatus {
-        ACTIVE, DELETED
+    // 상태 매핑 메서드들
+    private static com.example.board.comment.domain.model.CommentStatus mapToDomainStatus(CommentEntityStatus entityStatus) {
+        return switch (entityStatus) {
+            case ACTIVE -> com.example.board.comment.domain.model.CommentStatus.ACTIVE;
+            case DELETED -> com.example.board.comment.domain.model.CommentStatus.DELETED;
+        };
     }
 
-    // Getter/Setter 메서드들
-    public String getCommentId() { return commentId; }
-    public void setCommentId(String commentId) { this.commentId = commentId; }
-
-    public String getPostId() { return postId; }
-    public void setPostId(String postId) { this.postId = postId; }
-
-    public String getAuthorId() { return authorId; }
-    public void setAuthorId(String authorId) { this.authorId = authorId; }
-
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-
-    public CommentStatus getStatus() { return status; }
-    public void setStatus(CommentStatus status) { this.status = status; }
-
-    public String getParentCommentId() { return parentCommentId; }
-    public void setParentCommentId(String parentCommentId) { this.parentCommentId = parentCommentId; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    private static CommentEntityStatus mapToEntityStatus(com.example.board.comment.domain.model.CommentStatus domainStatus) {
+        return switch (domainStatus) {
+            case ACTIVE -> CommentEntityStatus.ACTIVE;
+            case DELETED -> CommentEntityStatus.DELETED;
+        };
+    }
 }

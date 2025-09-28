@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
 @Repository
 public class BoardRepositoryImpl implements BoardRepository {
 
@@ -49,6 +48,8 @@ public class BoardRepositoryImpl implements BoardRepository {
 
     @Override
     public void deleteById(BoardId boardId) {
-        jpaRepository.deleteById(boardId.getValue());
+        // publicId로 삭제하려면 먼저 엔티티를 찾아서 삭제해야 함
+        jpaRepository.findByPublicId(boardId.getValue())
+                .ifPresent(jpaRepository::delete);
     }
 }

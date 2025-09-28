@@ -4,8 +4,6 @@ import com.example.board.user.domain.model.Email;
 import com.example.board.user.domain.model.User;
 import com.example.board.user.domain.model.UserId;
 import com.example.board.user.domain.repository.UserRepository;
-
-
 import com.example.board.user.infrastructure.entity.UserEntity;
 import org.springframework.stereotype.Repository;
 
@@ -29,6 +27,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findById(UserId userId) {
+        // UserId(UUID)로 조회 - publicId 컬럼에서 찾음
         return jpaRepository.findByPublicId(userId.getValue())
                 .map(UserEntity::toDomain);
     }
@@ -57,6 +56,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void deleteById(UserId userId) {
-        jpaRepository.deleteById(userId.getValue());
+        // publicId로 삭제하려면 먼저 엔티티를 찾아서 삭제해야 함
+        jpaRepository.findByPublicId(userId.getValue())
+                .ifPresent(jpaRepository::delete);
     }
 }

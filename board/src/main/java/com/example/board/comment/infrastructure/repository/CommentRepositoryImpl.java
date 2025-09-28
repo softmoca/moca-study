@@ -3,6 +3,7 @@ package com.example.board.comment.infrastructure.repository;
 import com.example.board.comment.domain.model.*;
 import com.example.board.comment.domain.repository.CommentRepository;
 import com.example.board.comment.infrastructure.entity.CommentEntity;
+import com.example.board.comment.infrastructure.entity.CommentEntityStatus;
 import com.example.board.board.domain.model.PostId;
 import com.example.board.user.domain.model.UserId;
 
@@ -30,51 +31,57 @@ public class CommentRepositoryImpl implements CommentRepository {
 
     @Override
     public Optional<Comment> findById(CommentId commentId) {
-        return jpaRepository.findById(commentId.getValue())
+        // CommentId(UUID)로 조회 - publicId 컬럼에서 찾음
+        return jpaRepository.findByPublicId(commentId.getValue())
                 .map(CommentEntity::toDomain);
     }
 
     @Override
     public List<Comment> findByPostId(PostId postId) {
-        return jpaRepository.findByPostIdOrderByCreatedAtAsc(postId.getValue()).stream()
+        // Post의 publicId로 댓글들을 찾음
+        return jpaRepository.findByPostPublicIdOrderByCreatedAtAsc(postId.getValue()).stream()
                 .map(CommentEntity::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Comment> findByPostIdAndStatus(PostId postId, CommentStatus status) {
-        CommentEntity.CommentStatus entityStatus = CommentEntity.CommentStatus.valueOf(status.name());
-        return jpaRepository.findByPostIdAndStatusOrderByCreatedAtAsc(postId.getValue(), entityStatus).stream()
+        CommentEntityStatus entityStatus = CommentEntityStatus.valueOf(status.name());
+        return jpaRepository.findByPostPublicIdAndStatusOrderByCreatedAtAsc(postId.getValue(), entityStatus).stream()
                 .map(CommentEntity::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Comment> findByParentCommentId(CommentId parentCommentId) {
-        return jpaRepository.findByParentCommentIdOrderByCreatedAtAsc(parentCommentId.getValue()).stream()
+        // 부모 댓글의 publicId로 대댓글들을 찾음
+        return jpaRepository.findByParentCommentPublicIdOrderByCreatedAtAsc(parentCommentId.getValue()).stream()
                 .map(CommentEntity::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Comment> findByAuthorId(UserId authorId) {
-        return jpaRepository.findByAuthorIdOrderByCreatedAtDesc(authorId.getValue()).stream()
+        // Author의 publicId로 댓글들을 찾음
+        return jpaRepository.findByAuthorPublicIdOrderByCreatedAtDesc(authorId.getValue()).stream()
                 .map(CommentEntity::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public long countByPostId(PostId postId) {
-        return jpaRepository.countByPostId(postId.getValue());
+        return jpaRepository.countByPostPublicId(postId.getValue());
     }
 
     @Override
     public long countByAuthorId(UserId authorId) {
-        return jpaRepository.countByAuthorId(authorId.getValue());
+        return jpaRepository.countByAuthorPublicId(authorId.getValue());
     }
 
     @Override
     public void deleteById(CommentId commentId) {
-        jpaRepository.deleteById(commentId.getValue());
+        // publicId로 삭제하려면 먼저 엔티티를 찾아서 삭제해야 함
+        jpaRepository.findByPublicId(commentId.getValue())
+                .ifPresent(jpaRepository::delete);
     }
 }
