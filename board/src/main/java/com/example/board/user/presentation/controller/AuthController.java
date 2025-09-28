@@ -1,24 +1,22 @@
-
 package com.example.board.user.presentation.controller;
 
-import com.example.board.user.application.dto.LoginRequest;
-import com.example.board.user.application.dto.LoginResponse;
+import com.example.board.user.application.dto.*;
 import com.example.board.user.application.service.AuthenticationService;
+import com.example.board.user.infrastructure.security.CustomUserDetails;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationService authenticationService;
-
-    public AuthController(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -26,10 +24,28 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshTokenResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        RefreshTokenResponse response = authenticationService.refreshTokens(request);
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
-        // JWT 기반에서는 클라이언트에서 토큰을 삭제하면 됨
-        // 서버에서 블랙리스트 관리가 필요한 경우 별도 구현
+    public ResponseEntity<Void> logout(@RequestBody(required = false) RefreshTokenRequest request) {
+        String refreshToken = request != null ? request.getRefreshToken() : null;
+        authenticationService.logout(refreshToken);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/logout/all")
+    public ResponseEntity<Void> logoutAllDevices(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        authenticationService.logoutAllDevices(userDetails.getUserId());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserResponse response = UserResponse.from(userDetails.getUser());
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,3 +1,4 @@
+# 업데이트된 application.yml
 server:
   port: 8080
 
@@ -7,15 +8,34 @@ spring:
     username: root
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        use_sql_comments: true # SQL? JPQL ?? ??
-        format_sql: true # ??? ??? SQL? ???(???/????) ??
-        highlight_sql: true # ????
+        use_sql_comments: true
+        format_sql: true
+        highlight_sql: true
 
-logging.level:
-  org.hibernate.SQL: debug # SQL ??
-  org.hibernate.orm.jdbc.bind: trace # ????
+  security:
+    # CORS 설정이 필요한 경우
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
+
+# JWT 설정
+jwt:
+  secret: mySecretKeyForJWTTokenGenerationThatShouldBeAtLeast256BitsLongAndSecure123!
+  access-token-validity-minutes: 15
+  refresh-token-validity-days: 7
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+    com.example.board: debug
+
+# 스케줄링 활성화
+spring.task.scheduling.enabled: true
