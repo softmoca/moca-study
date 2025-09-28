@@ -1,7 +1,8 @@
+// 개선된 CurrentUserArgumentResolver.java - JwtUserPrincipal 사용
 package com.example.board.common.resolver;
 
 import com.example.board.common.annotation.CurrentUser;
-import com.example.board.user.infrastructure.security.CustomUserDetails;
+import com.example.board.user.infrastructure.security.JwtUserPrincipal;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,11 +29,13 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            return userDetails.getUserId();
+        if (authentication != null && authentication.getPrincipal() instanceof JwtUserPrincipal) {
+            JwtUserPrincipal principal = (JwtUserPrincipal) authentication.getPrincipal();
+            return principal.getUserId();
         }
 
-        return null;
+        // 폴백: request attribute에서 가져오기
+        String userId = (String) webRequest.getAttribute("userId", NativeWebRequest.SCOPE_REQUEST);
+        return userId;
     }
 }
