@@ -1,7 +1,7 @@
+// 개선된 JwtAuthenticationFilter.java - DB 조회 없이 토큰만으로 인증
 package com.example.board.user.infrastructure.security;
 
-import com.example.board.user.domain.model.User;
-import com.example.board.user.domain.service.TokenDomainService;
+import com.example.board.user.infrastructure.jwt.JwtTokenService;
 import com.example.board.common.exception.BusinessException;
 
 import jakarta.servlet.FilterChain;
@@ -12,21 +12,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collection;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final TokenDomainService tokenDomainService;
-    private final CustomUserDetailsService userDetailsService;
+    private final JwtTokenService jwtTokenService;
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
@@ -39,26 +39,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String accessToken = extractTokenFromRequest(request);
 
-            if (StringUtils.hasText(accessToken) && tokenDomainService.isAccessTokenValid(accessToken)) {
-                User user = tokenDomainService.validateTokenAndGetUser(accessToken);
-                UserDetails userDetails = userDetailsService.createUserDetails(user);
+            if (StringUtils.hasText(accessToken) && jwtTokenService.validateAccessToken(accessToken)) {
+                // 토큰에서 직접 정보 추출 (DB 조회 없음)
+                String userId = jwtTokenService.extractUserId(accessToken);
+                String username = jwtTokenService.extractUsername(accessToken);
+                String email = jwtTokenService.extractEmail(accessToken);
+                boolean active = jwtTokenService.isUserActiveFromToken(accessToken);
+                Collection<SimpleGrantedAuthority> authorities = jwtTokenService.extractAuthorities(accessToken);
+
+                // 경량화된 Principal 객체 생성
+                JwtUserPrincipal principal = new JwtUserPrincipal(userId, username, email, active);
 
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                        new UsernamePasswordAuthenticationToken(principal, null, authorities);
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // 사용자 ID를 요청 속성에 저장 (컨트롤러에서 사용 가능)
-                request.setAttribute("userId", user.getUserId().getValue());
+                // 컨트롤러에서 사용할 수 있도록 요청 속성에 저장
+                request.setAttribute("userId", userId);
+                request.setAttribute("username", username);
+                request.setAttribute("email", email);
+
+                log.debug("JWT authentication successful for user: {}", username);
             }
         } catch (BusinessException e) {
             log.debug("JWT authentication failed: {}", e.getMessage());
-            // 인증 실패시 SecurityContext를 clear하고 계속 진행
             SecurityContextHolder.clearContext();
         } catch (Exception e) {
             log.error("JWT authentication error: {}", e.getMessage(), e);
