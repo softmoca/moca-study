@@ -3,6 +3,7 @@ package com.example.board.board.presentation.controller;
 import com.example.board.board.application.dto.BoardCreateRequest;
 import com.example.board.board.application.dto.BoardResponse;
 import com.example.board.board.application.service.BoardApplicationService;
+import com.example.board.board.presentation.api.BoardApi;
 import com.example.board.common.annotation.CurrentUser;
 
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/boards")
 @RequiredArgsConstructor
-public class BoardController {
+public class BoardController implements BoardApi {
 
     private final BoardApplicationService boardApplicationService;
 

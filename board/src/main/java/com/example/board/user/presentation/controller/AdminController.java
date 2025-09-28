@@ -3,6 +3,7 @@ package com.example.board.user.presentation.controller;
 import com.example.board.user.application.dto.UserResponse;
 import com.example.board.user.application.service.UserApplicationService;
 
+import com.example.board.user.presentation.api.AdminApi;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminController {
+public class AdminController implements AdminApi {
 
     private final UserApplicationService userApplicationService;
 

@@ -5,6 +5,7 @@ import com.example.board.comment.application.dto.CommentCreateRequest;
 import com.example.board.comment.application.dto.CommentUpdateRequest;
 import com.example.board.comment.application.dto.CommentResponse;
 import com.example.board.comment.application.service.CommentApplicationService;
+import com.example.board.comment.presentation.api.CommentApi;
 import com.example.board.common.annotation.CurrentUser;
 
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/comments")
 @RequiredArgsConstructor
-public class CommentController {
+public class CommentController implements CommentApi {
 
     private final CommentApplicationService commentApplicationService;
 

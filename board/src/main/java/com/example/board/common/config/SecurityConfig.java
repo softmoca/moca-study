@@ -46,6 +46,18 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll() // refresh 엔드포인트 제거
                         .requestMatchers("/api/users").permitAll() // 회원가입
 
+                        // Swagger 관련 경로들 모두 허용
+                        .requestMatchers(
+                                "/api/test/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/swagger-ui/index.html"
+                        ).permitAll()
+
                         // 관리자 권한이 필요한 엔드포인트들
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/boards").hasRole("ADMIN") // 게시판 생성은 관리자만

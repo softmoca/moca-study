@@ -2,6 +2,7 @@ package com.example.board.board.presentation.controller;
 
 import com.example.board.board.application.dto.*;
 import com.example.board.board.application.service.PostApplicationService;
+import com.example.board.board.presentation.api.PostApi;
 import com.example.board.common.annotation.CurrentUser;
 
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
-public class PostController {
+public class PostController implements PostApi {
 
     private final PostApplicationService postApplicationService;
 
