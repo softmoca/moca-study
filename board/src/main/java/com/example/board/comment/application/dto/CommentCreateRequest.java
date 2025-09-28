@@ -3,7 +3,13 @@ package com.example.board.comment.application.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class CommentCreateRequest {
 
     @NotNull(message = "게시글 ID는 필수입니다")
@@ -16,23 +22,4 @@ public class CommentCreateRequest {
 
     private String parentCommentId; // 대댓글인 경우
 
-    // 기본 생성자
-    public CommentCreateRequest() {}
-
-    // 생성자
-    public CommentCreateRequest(String postId, String content, String parentCommentId) {
-        this.postId = postId;
-        this.content = content;
-        this.parentCommentId = parentCommentId;
-    }
-
-    // Getter/Setter
-    public String getPostId() { return postId; }
-    public void setPostId(String postId) { this.postId = postId; }
-
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-
-    public String getParentCommentId() { return parentCommentId; }
-    public void setParentCommentId(String parentCommentId) { this.parentCommentId = parentCommentId; }
 }
