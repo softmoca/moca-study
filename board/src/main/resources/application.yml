@@ -28,8 +28,8 @@ spring:
 # JWT 설정
 jwt:
   secret: mySecretKeyForJWTTokenGenerationThatShouldBeAtLeast256BitsLongAndSecure123!
-  access-token-validity-minutes: 15
-  refresh-token-validity-days: 7
+  access-token-validity-minutes: 60
+
 
 logging:
   level:
@@ -37,5 +37,4 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
     com.example.board: debug
 
-# 스케줄링 활성화
-spring.task.scheduling.enabled: true
+

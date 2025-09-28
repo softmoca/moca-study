@@ -1,11 +1,7 @@
-// 수정된 AdminController.java
 package com.example.board.user.presentation.controller;
 
 import com.example.board.user.application.dto.UserResponse;
 import com.example.board.user.application.service.UserApplicationService;
-import com.example.board.user.domain.service.TokenDomainService;
-import com.example.board.user.domain.model.UserId;
-import com.example.board.common.annotation.CurrentUser;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 public class AdminController {
 
     private final UserApplicationService userApplicationService;
-    private final TokenDomainService tokenDomainService;
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserResponse> getUser(@PathVariable String userId) {
@@ -28,15 +23,6 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/users/{userId}/revoke-tokens")
-    public ResponseEntity<Void> revokeUserTokens(@PathVariable String userId) {
-        tokenDomainService.revokeAllUserTokens(UserId.of(userId));
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/tokens/cleanup")
-    public ResponseEntity<Void> cleanupExpiredTokens() {
-        tokenDomainService.cleanupExpiredTokens();
-        return ResponseEntity.ok().build();
-    }
+    // 리프레시 토큰 관련 메서드들 제거
+    // 액세스 토큰만 사용하는 stateless 방식에서는 서버에서 토큰을 무효화할 수 없음
 }

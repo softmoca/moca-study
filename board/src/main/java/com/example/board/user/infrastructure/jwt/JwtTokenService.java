@@ -24,15 +24,12 @@ public class JwtTokenService implements TokenService {
 
     private final SecretKey secretKey;
     private final long accessTokenValidityMinutes;
-    private final long refreshTokenValidityDays;
 
     public JwtTokenService(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-token-validity-minutes:15}") long accessTokenValidityMinutes,
-            @Value("${jwt.refresh-token-validity-days:7}") long refreshTokenValidityDays) {
+            @Value("${jwt.access-token-validity-minutes:60}") long accessTokenValidityMinutes) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
         this.accessTokenValidityMinutes = accessTokenValidityMinutes;
-        this.refreshTokenValidityDays = refreshTokenValidityDays;
     }
 
     @Override
@@ -56,31 +53,6 @@ public class JwtTokenService implements TokenService {
     }
 
     @Override
-    public RefreshToken generateRefreshToken(User user) {
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(refreshTokenValidityDays);
-        Date expirationDate = Date.from(expiresAt.atZone(ZoneId.systemDefault()).toInstant());
-
-        String tokenValue = Jwts.builder()
-                .setSubject(user.getUserId().getValue())
-                .setIssuedAt(new Date())
-                .setExpiration(expirationDate)
-                .claim("type", "REFRESH")
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
-
-        return RefreshToken.of(tokenValue, expiresAt, user.getUserId());
-    }
-
-    @Override
-    public TokenPair generateTokenPair(User user) {
-        AccessToken accessToken = generateAccessToken(user);
-        RefreshToken refreshToken = generateRefreshToken(user);
-        return new TokenPair(accessToken, refreshToken);
-    }
-
-    // === API 서버용 토큰 검증 및 정보 추출 메서드들 ===
-
-    @Override
     public boolean validateAccessToken(String tokenValue) {
         try {
             Claims claims = parseToken(tokenValue);
@@ -90,18 +62,6 @@ public class JwtTokenService implements TokenService {
             return "ACCESS".equals(tokenType) && Boolean.TRUE.equals(isActive);
         } catch (Exception e) {
             log.debug("Invalid access token: {}", e.getMessage());
-            return false;
-        }
-    }
-
-    @Override
-    public boolean validateRefreshToken(String tokenValue) {
-        try {
-            Claims claims = parseToken(tokenValue);
-            String tokenType = claims.get("type", String.class);
-            return "REFRESH".equals(tokenType);
-        } catch (Exception e) {
-            log.debug("Invalid refresh token: {}", e.getMessage());
             return false;
         }
     }
@@ -165,17 +125,6 @@ public class JwtTokenService implements TokenService {
     @Override
     public UserId extractUserIdFromAccessToken(String tokenValue) {
         return UserId.of(extractUserId(tokenValue));
-    }
-
-    @Override
-    public UserId extractUserIdFromRefreshToken(String tokenValue) {
-        return UserId.of(extractUserId(tokenValue));
-    }
-
-    @Override
-    public TokenPair refreshTokens(String refreshTokenValue) {
-        // 이 메서드는 TokenDomainService에서 처리하도록 위임
-        throw new UnsupportedOperationException("Use TokenDomainService.refreshTokens() instead");
     }
 
     private Claims parseToken(String tokenValue) {

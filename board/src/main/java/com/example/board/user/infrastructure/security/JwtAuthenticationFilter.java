@@ -1,8 +1,6 @@
-// 개선된 JwtAuthenticationFilter.java - DB 조회 없이 토큰만으로 인증
 package com.example.board.user.infrastructure.security;
 
 import com.example.board.user.infrastructure.jwt.JwtTokenService;
-import com.example.board.common.exception.BusinessException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -54,7 +51,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-
             log.debug("JWT authentication successful for user: {}", username);
         }
         // 예외 처리는 JwtExceptionFilter에서 담당
@@ -76,8 +72,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
 
-        // 인증이 필요 없는 경로들
-        return path.startsWith("/api/auth/") ||
+        // 인증이 필요 없는 경로들 (refresh 경로 제거)
+        return path.startsWith("/api/auth/login") ||
                 path.equals("/api/users") ||
                 path.startsWith("/api/public/") ||
                 path.startsWith("/h2-console/") ||

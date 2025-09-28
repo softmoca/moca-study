@@ -40,36 +40,13 @@ public class AuthenticationService implements AuthenticateUserUseCase {
                 throw new BusinessException("비활성화된 계정입니다");
             }
 
-            // 토큰 쌍 생성
-            TokenPair tokenPair = tokenDomainService.authenticateAndGenerateTokens(user);
+            // 액세스 토큰 생성
+            AccessToken accessToken = tokenDomainService.authenticateAndGenerateToken(user);
 
-            return LoginResponse.from(tokenPair, UserResponse.from(user));
+            return LoginResponse.from(accessToken, UserResponse.from(user));
 
         } catch (IllegalArgumentException e) {
             throw new BusinessException("로그인 실패: " + e.getMessage());
         }
-    }
-
-    @Transactional
-    public RefreshTokenResponse refreshTokens(RefreshTokenRequest request) {
-        try {
-            TokenPair newTokenPair = tokenDomainService.refreshTokens(request.getRefreshToken());
-            return RefreshTokenResponse.from(newTokenPair);
-        } catch (Exception e) {
-            throw new BusinessException("토큰 갱신 실패: " + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void logout(String refreshToken) {
-        if (refreshToken != null && !refreshToken.trim().isEmpty()) {
-            tokenDomainService.revokeRefreshToken(refreshToken);
-        }
-    }
-
-    @Transactional
-    public void logoutAllDevices(String userId) {
-        UserId userIdObj = UserId.of(userId);
-        tokenDomainService.revokeAllUserTokens(userIdObj);
     }
 }

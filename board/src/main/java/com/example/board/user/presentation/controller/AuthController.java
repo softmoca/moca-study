@@ -1,4 +1,3 @@
-// 개선된 AuthController.java - JwtUserPrincipal 사용
 package com.example.board.user.presentation.controller;
 
 import com.example.board.user.application.dto.*;
@@ -28,22 +27,10 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<RefreshTokenResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
-        RefreshTokenResponse response = authenticationService.refreshTokens(request);
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody(required = false) RefreshTokenRequest request) {
-        String refreshToken = request != null ? request.getRefreshToken() : null;
-        authenticationService.logout(refreshToken);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/logout/all")
-    public ResponseEntity<Void> logoutAllDevices(@AuthenticationPrincipal JwtUserPrincipal principal) {
-        authenticationService.logoutAllDevices(principal.getUserId());
+    public ResponseEntity<Void> logout() {
+        // 리프레시 토큰이 없으므로 클라이언트에서 토큰을 삭제하면 됨
+        // 서버에서 할 일은 없음 (stateless)
         return ResponseEntity.ok().build();
     }
 

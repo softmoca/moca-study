@@ -1,4 +1,3 @@
-// 완성된 SecurityConfig.java - JwtExceptionFilter 적용
 package com.example.board.common.config;
 
 import com.example.board.user.infrastructure.security.JwtAuthenticationFilter;
@@ -44,7 +43,7 @@ public class SecurityConfig {
                 // 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // 인증이 필요 없는 엔드포인트들
-                        .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll() // refresh 엔드포인트 제거
                         .requestMatchers("/api/users").permitAll() // 회원가입
 
                         // 관리자 권한이 필요한 엔드포인트들
@@ -56,7 +55,7 @@ public class SecurityConfig {
                 )
 
                 // JWT 예외 필터를 JWT 인증 필터보다 먼저 배치
-                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, UsernamePasswordAuthenticationFilter.class)
                 // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 배치
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -74,11 +73,6 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
     }
 
     @Bean
