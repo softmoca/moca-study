@@ -46,9 +46,6 @@ public class SecurityConfig {
                         // 인증이 필요 없는 엔드포인트들
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
                         .requestMatchers("/api/users").permitAll() // 회원가입
-                        .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
 
                         // 관리자 권한이 필요한 엔드포인트들
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
