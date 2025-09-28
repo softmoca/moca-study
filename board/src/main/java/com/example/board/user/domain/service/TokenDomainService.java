@@ -1,4 +1,4 @@
-// TokenDomainService.java - 토큰 관련 도메인 비즈니스 로직
+// 개선된 TokenDomainService.java - 순수 비즈니스 로직에 집중
 package com.example.board.user.domain.service;
 
 import com.example.board.user.domain.model.*;
@@ -18,6 +18,10 @@ public class TokenDomainService {
     private final UserRepository userRepository;
     private final TokenService tokenService;
 
+    /**
+     * 사용자 인증 후 토큰 쌍 생성
+     * 로그인 시에만 사용됨
+     */
     public TokenPair authenticateAndGenerateTokens(User user) {
         // 기존 리프레시 토큰이 있다면 삭제 (한 사용자당 하나의 리프레시 토큰만 유지)
         refreshTokenRepository.deleteByUserId(user.getUserId());
@@ -31,6 +35,9 @@ public class TokenDomainService {
         return tokenPair;
     }
 
+    /**
+     * 리프레시 토큰으로 새로운 토큰 쌍 생성
+     */
     public TokenPair refreshTokens(String refreshTokenValue) {
         // 리프레시 토큰 유효성 검증
         if (!tokenService.validateRefreshToken(refreshTokenValue)) {
@@ -47,7 +54,7 @@ public class TokenDomainService {
             throw new BusinessException("만료된 리프레시 토큰입니다");
         }
 
-        // 사용자 조회
+        // 사용자 조회 (최신 정보 확인용)
         User user = userRepository.findById(storedRefreshToken.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User", storedRefreshToken.getUserId().getValue()));
 
@@ -64,44 +71,41 @@ public class TokenDomainService {
         return authenticateAndGenerateTokens(user);
     }
 
+    /**
+     * 특정 리프레시 토큰 무효화 (로그아웃)
+     */
     public void revokeRefreshToken(String refreshTokenValue) {
         refreshTokenRepository.deleteByValue(refreshTokenValue);
     }
 
+    /**
+     * 사용자의 모든 토큰 무효화 (전체 로그아웃)
+     */
     public void revokeAllUserTokens(UserId userId) {
         refreshTokenRepository.deleteByUserId(userId);
     }
 
-    public boolean isAccessTokenValid(String accessTokenValue) {
-        if (accessTokenValue == null || accessTokenValue.trim().isEmpty()) {
-            return false;
-        }
-
-        return tokenService.validateAccessToken(accessTokenValue);
-    }
-
-    public UserId getUserIdFromAccessToken(String accessTokenValue) {
-        if (!isAccessTokenValid(accessTokenValue)) {
-            throw new BusinessException("유효하지 않은 액세스 토큰입니다");
-        }
-
-        return tokenService.extractUserIdFromAccessToken(accessTokenValue);
-    }
-
-    public User validateTokenAndGetUser(String accessTokenValue) {
-        UserId userId = getUserIdFromAccessToken(accessTokenValue);
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User", userId.getValue()));
-
-        if (!user.isActive()) {
-            throw new BusinessException("비활성화된 계정입니다");
-        }
-
-        return user;
-    }
-
+    /**
+     * 만료된 토큰들 정리 (스케줄러용)
+     */
     public void cleanupExpiredTokens() {
         refreshTokenRepository.deleteExpiredTokens();
+    }
+
+    /**
+     * 사용자 ID로 현재 사용자 정보 조회
+     * 컨트롤러에서 최신 사용자 정보가 필요한 경우에만 사용
+     */
+    public User getUserById(UserId userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User", userId.getValue()));
+    }
+
+    /**
+     * 사용자 상태 변경 시 모든 토큰 무효화
+     * 예: 사용자 비활성화, 권한 변경 등
+     */
+    public void invalidateTokensOnUserStatusChange(UserId userId) {
+        refreshTokenRepository.deleteByUserId(userId);
     }
 }

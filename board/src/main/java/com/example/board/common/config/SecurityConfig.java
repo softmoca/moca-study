@@ -1,6 +1,6 @@
+// 개선된 SecurityConfig.java - API 서버에 최적화
 package com.example.board.common.config;
 
-import com.example.board.user.infrastructure.security.CustomUserDetailsService;
 import com.example.board.user.infrastructure.security.JwtAuthenticationEntryPoint;
 import com.example.board.user.infrastructure.security.JwtAuthenticationFilter;
 
@@ -32,17 +32,21 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // API 서버용 설정: CSRF 비활성화, Stateless 세션
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 인증 실패 처리
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 )
+
+                // 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // 인증이 필요 없는 엔드포인트들
                         .requestMatchers("/api/auth/login", "/api/auth/refresh").permitAll()
@@ -58,7 +62,8 @@ public class SecurityConfig {
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
-                .userDetailsService(userDetailsService)
+
+                // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 배치
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
