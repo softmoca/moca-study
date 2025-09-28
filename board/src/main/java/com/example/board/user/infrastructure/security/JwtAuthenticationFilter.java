@@ -36,40 +36,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        try {
-            String accessToken = extractTokenFromRequest(request);
+        String accessToken = extractTokenFromRequest(request);
 
-            if (StringUtils.hasText(accessToken) && jwtTokenService.validateAccessToken(accessToken)) {
-                // 토큰에서 직접 정보 추출 (DB 조회 없음)
-                String userId = jwtTokenService.extractUserId(accessToken);
-                String username = jwtTokenService.extractUsername(accessToken);
-                String email = jwtTokenService.extractEmail(accessToken);
-                boolean active = jwtTokenService.isUserActiveFromToken(accessToken);
-                Collection<SimpleGrantedAuthority> authorities = jwtTokenService.extractAuthorities(accessToken);
+        if (StringUtils.hasText(accessToken) && jwtTokenService.validateAccessToken(accessToken)) {
+            // 토큰에서 직접 정보 추출 (DB 조회 없음)
+            String userId = jwtTokenService.extractUserId(accessToken);
+            String username = jwtTokenService.extractUsername(accessToken);
+            String email = jwtTokenService.extractEmail(accessToken);
+            boolean active = jwtTokenService.isUserActiveFromToken(accessToken);
+            Collection<SimpleGrantedAuthority> authorities = jwtTokenService.extractAuthorities(accessToken);
 
-                // 경량화된 Principal 객체 생성
-                JwtUserPrincipal principal = new JwtUserPrincipal(userId, username, email, active);
+            // 경량화된 Principal 객체 생성
+            JwtUserPrincipal principal = new JwtUserPrincipal(userId, username, email, active);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(principal, null, authorities);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(principal, null, authorities);
 
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // 컨트롤러에서 사용할 수 있도록 요청 속성에 저장
-                request.setAttribute("userId", userId);
-                request.setAttribute("username", username);
-                request.setAttribute("email", email);
+            // 컨트롤러에서 사용할 수 있도록 요청 속성에 저장
+            request.setAttribute("userId", userId);
+            request.setAttribute("username", username);
+            request.setAttribute("email", email);
 
-                log.debug("JWT authentication successful for user: {}", username);
-            }
-        } catch (BusinessException e) {
-            log.debug("JWT authentication failed: {}", e.getMessage());
-            SecurityContextHolder.clearContext();
-        } catch (Exception e) {
-            log.error("JWT authentication error: {}", e.getMessage(), e);
-            SecurityContextHolder.clearContext();
+            log.debug("JWT authentication successful for user: {}", username);
         }
+        // 예외 처리는 JwtExceptionFilter에서 담당
 
         filterChain.doFilter(request, response);
     }

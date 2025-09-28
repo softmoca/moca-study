@@ -1,8 +1,8 @@
-// 개선된 SecurityConfig.java - API 서버에 최적화
+// 완성된 SecurityConfig.java - JwtExceptionFilter 적용
 package com.example.board.common.config;
 
-import com.example.board.user.infrastructure.security.JwtAuthenticationEntryPoint;
 import com.example.board.user.infrastructure.security.JwtAuthenticationFilter;
+import com.example.board.user.infrastructure.security.JwtExceptionFilter;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +31,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtExceptionFilter jwtExceptionFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,11 +40,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // 인증 실패 처리
-                .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                )
 
                 // 권한 설정
                 .authorizeHttpRequests(auth -> auth
@@ -63,6 +58,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
+                // JWT 예외 필터를 JWT 인증 필터보다 먼저 배치
+                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
                 // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 배치
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

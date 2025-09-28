@@ -10,9 +10,9 @@ import com.example.board.user.domain.model.User;
 import com.example.board.user.domain.model.UserId;
 import com.example.board.user.domain.repository.UserRepository;
 import com.example.board.user.domain.service.UserDomainService;
-import com.example.board.common.util.PasswordEncoder;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

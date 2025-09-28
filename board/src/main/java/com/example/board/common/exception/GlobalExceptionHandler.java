@@ -31,6 +31,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    // JWT 인증 예외 처리 추가
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleJwtAuthenticationException(JwtAuthenticationException e) {
+        ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException e) {
         Map<String, Object> response = new HashMap<>();
@@ -55,6 +62,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // ErrorResponse를 public static으로 변경하여 다른 곳에서도 사용 가능
     public static class ErrorResponse {
         private final String code;
         private final String message;

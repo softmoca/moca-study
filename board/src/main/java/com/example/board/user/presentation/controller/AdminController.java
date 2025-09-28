@@ -1,8 +1,10 @@
-package com.example.board.admin.presentation.controller;
+// 수정된 AdminController.java
+package com.example.board.user.presentation.controller;
 
 import com.example.board.user.application.dto.UserResponse;
 import com.example.board.user.application.service.UserApplicationService;
 import com.example.board.user.domain.service.TokenDomainService;
+import com.example.board.user.domain.model.UserId;
 import com.example.board.common.annotation.CurrentUser;
 
 import org.springframework.http.ResponseEntity;
@@ -28,7 +30,7 @@ public class AdminController {
 
     @PostMapping("/users/{userId}/revoke-tokens")
     public ResponseEntity<Void> revokeUserTokens(@PathVariable String userId) {
-        tokenDomainService.revokeAllUserTokens(com.example.board.user.domain.model.UserId.of(userId));
+        tokenDomainService.revokeAllUserTokens(UserId.of(userId));
         return ResponseEntity.ok().build();
     }
 

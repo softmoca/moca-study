@@ -6,9 +6,9 @@ import com.example.board.user.application.usecase.AuthenticateUserUseCase;
 import com.example.board.user.domain.model.*;
 import com.example.board.user.domain.repository.UserRepository;
 import com.example.board.user.domain.service.TokenDomainService;
-import com.example.board.common.util.PasswordEncoder;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
