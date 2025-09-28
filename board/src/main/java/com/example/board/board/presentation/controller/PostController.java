@@ -1,30 +1,28 @@
-// PostController.java - 게시글 컨트롤러
 package com.example.board.board.presentation.controller;
 
 import com.example.board.board.application.dto.*;
 import com.example.board.board.application.service.PostApplicationService;
+import com.example.board.common.annotation.CurrentUser;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
+@RequiredArgsConstructor
 public class PostController {
 
     private final PostApplicationService postApplicationService;
 
-    public PostController(PostApplicationService postApplicationService) {
-        this.postApplicationService = postApplicationService;
-    }
-
     @PostMapping
     public ResponseEntity<PostResponse> createPost(
             @Valid @RequestBody PostCreateRequest request,
-            @RequestHeader("X-User-Id") String userId) { // 실제로는 JWT에서 추출
+            @CurrentUser String userId) {
         PostResponse response = postApplicationService.createPost(request, userId);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -32,7 +30,7 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse> getPost(
             @PathVariable String postId,
-            @RequestHeader(value = "X-User-Id", required = false) String userId) {
+            @CurrentUser String userId) {
         PostResponse response = postApplicationService.getPost(postId, userId);
         return ResponseEntity.ok(response);
     }
@@ -41,7 +39,7 @@ public class PostController {
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable String postId,
             @Valid @RequestBody PostUpdateRequest request,
-            @RequestHeader("X-User-Id") String userId) {
+            @CurrentUser String userId) {
         PostResponse response = postApplicationService.updatePost(postId, request, userId);
         return ResponseEntity.ok(response);
     }
@@ -49,7 +47,7 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable String postId,
-            @RequestHeader("X-User-Id") String userId) {
+            @CurrentUser String userId) {
         postApplicationService.deletePost(postId, userId);
         return ResponseEntity.noContent().build();
     }

@@ -3,28 +3,29 @@ package com.example.board.board.presentation.controller;
 import com.example.board.board.application.dto.BoardCreateRequest;
 import com.example.board.board.application.dto.BoardResponse;
 import com.example.board.board.application.service.BoardApplicationService;
+import com.example.board.common.annotation.CurrentUser;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/boards")
+@RequiredArgsConstructor
 public class BoardController {
 
     private final BoardApplicationService boardApplicationService;
 
-    public BoardController(BoardApplicationService boardApplicationService) {
-        this.boardApplicationService = boardApplicationService;
-    }
-
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BoardResponse> createBoard(
             @Valid @RequestBody BoardCreateRequest request,
-            @RequestHeader("X-User-Id") String userId) {
+            @CurrentUser String userId) {
         BoardResponse response = boardApplicationService.createBoard(request, userId);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
