@@ -3,14 +3,12 @@ package com.example.board.board.application.service;
 import com.example.board.board.application.dto.BoardCreateRequest;
 import com.example.board.board.application.dto.BoardResponse;
 import com.example.board.board.application.usecase.CreateBoardUseCase;
-import com.example.board.board.domain.model.Board;
-import com.example.board.board.domain.model.BoardId;
-import com.example.board.board.domain.repository.BoardRepository;
-import com.example.board.board.domain.repository.PostRepository;
+import com.example.board.board.domain.Board;
+import com.example.board.board.repository.BoardRepository;
+import com.example.board.board.repository.PostRepository;  // 추가
 import com.example.board.board.domain.service.BoardDomainService;
-import com.example.board.user.domain.model.User;
-import com.example.board.user.domain.model.UserId;
-import com.example.board.user.domain.repository.UserRepository;
+import com.example.board.user.domain.User;
+import com.example.board.user.repository.UserRepository;
 import com.example.board.common.exception.BusinessException;
 import com.example.board.common.exception.EntityNotFoundException;
 
@@ -27,35 +25,31 @@ import java.util.stream.Collectors;
 public class BoardApplicationService implements CreateBoardUseCase {
 
     private final BoardRepository boardRepository;
-    private final PostRepository postRepository;
+    private final PostRepository postRepository;  // 추가
     private final UserRepository userRepository;
     private final BoardDomainService boardDomainService;
 
     @Override
     @Transactional
-    public BoardResponse createBoard(BoardCreateRequest request, String createdBy) {
+    public BoardResponse createBoard(BoardCreateRequest request, String userId) {
         try {
-            // 사용자 조회 및 권한 확인
-            UserId createdByUserId = UserId.of(createdBy);
-            User creator = userRepository.findById(createdByUserId)
-                    .orElseThrow(() -> new EntityNotFoundException("User", createdBy));
+            Long userIdLong = Long.parseLong(userId);
+            User creator = userRepository.findById(userIdLong)
+                    .orElseThrow(() -> new EntityNotFoundException("User", userId));
 
-            // 관리자 권한 확인
             if (!creator.isAdmin()) {
                 throw new BusinessException("게시판 생성 권한이 없습니다. 관리자만 게시판을 생성할 수 있습니다.");
             }
 
-            // 도메인 서비스를 통한 유효성 검증
             boardDomainService.validateBoardCreation(request.getName());
 
-            // 게시판 생성
-            Board board = new Board(request.getName(), request.getDescription(), createdByUserId);
-
-            // 저장
+            Board board = new Board(request.getName(), request.getDescription(), userIdLong);
             Board savedBoard = boardRepository.save(board);
 
-            return BoardResponse.from(savedBoard, 0L); // 새로 생성된 게시판이므로 postCount는 0
+            return BoardResponse.from(savedBoard, 0L);
 
+        } catch (NumberFormatException e) {
+            throw new BusinessException("잘못된 사용자 ID 형식입니다");
         } catch (IllegalArgumentException e) {
             throw new BusinessException("게시판 생성 실패: " + e.getMessage());
         }
@@ -65,17 +59,22 @@ public class BoardApplicationService implements CreateBoardUseCase {
         List<Board> boards = boardRepository.findAllActive();
         return boards.stream()
                 .map(board -> {
-                    long postCount = postRepository.countByBoardId(board.getBoardId());
+                    long postCount = postRepository.countByBoardId(board.getId());  // 이제 작동!
                     return BoardResponse.from(board, postCount);
                 })
                 .collect(Collectors.toList());
     }
 
     public BoardResponse getBoard(String boardId) {
-        Board board = boardRepository.findById(BoardId.of(boardId))
-                .orElseThrow(() -> new EntityNotFoundException("Board", boardId));
+        try {
+            Long id = Long.parseLong(boardId);
+            Board board = boardRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Board", boardId));
 
-        long postCount = postRepository.countByBoardId(board.getBoardId());
-        return BoardResponse.from(board, postCount);
+            long postCount = postRepository.countByBoardId(board.getId());  // 이제 작동!
+            return BoardResponse.from(board, postCount);
+        } catch (NumberFormatException e) {
+            throw new BusinessException("잘못된 게시판 ID 형식입니다");
+        }
     }
 }

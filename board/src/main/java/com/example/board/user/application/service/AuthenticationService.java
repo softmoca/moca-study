@@ -3,9 +3,11 @@ package com.example.board.user.application.service;
 import com.example.board.common.exception.BusinessException;
 import com.example.board.user.application.dto.*;
 import com.example.board.user.application.usecase.AuthenticateUserUseCase;
-import com.example.board.user.domain.model.*;
-import com.example.board.user.domain.repository.UserRepository;
+import com.example.board.user.domain.User;
+import com.example.board.user.domain.AccessToken;
 import com.example.board.user.domain.service.TokenDomainService;
+import com.example.board.user.repository.UserRepository;
+
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,12 +28,11 @@ public class AuthenticationService implements AuthenticateUserUseCase {
     public LoginResponse authenticate(LoginRequest request) {
         try {
             // 이메일로 사용자 조회
-            Email email = Email.of(request.getEmail());
-            User user = userRepository.findByEmail(email)
+            User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new BusinessException("이메일 또는 비밀번호가 잘못되었습니다"));
 
             // 비밀번호 검증
-            if (!passwordEncoder.matches(request.getPassword(), user.getPassword().getValue())) {
+            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
                 throw new BusinessException("이메일 또는 비밀번호가 잘못되었습니다");
             }
 

@@ -1,12 +1,13 @@
-package com.example.board.comment.infrastructure.entity;
+package com.example.board.board.domain;
 
-public enum CommentEntityStatus {
-    ACTIVE("활성"),
+public enum PostStatus {
+    DRAFT("임시저장"),
+    PUBLISHED("게시됨"),
     DELETED("삭제됨");
 
     private final String description;
 
-    CommentEntityStatus(String description) {
+    PostStatus(String description) {
         this.description = description;
     }
 

@@ -1,12 +1,9 @@
-package com.example.board.comment.domain.service;
+package com.example.board.comment.service;
 
-import com.example.board.comment.domain.model.Comment;
-import com.example.board.comment.domain.model.CommentId;
-import com.example.board.comment.domain.repository.CommentRepository;
-import com.example.board.board.domain.model.Post;
-import com.example.board.board.domain.model.PostId;
-import com.example.board.board.domain.repository.PostRepository;
-import com.example.board.user.domain.model.UserId;
+import com.example.board.comment.domain.Comment;
+import com.example.board.comment.repository.CommentRepository;
+import com.example.board.board.domain.Post;
+import com.example.board.board.repository.PostRepository;
 import com.example.board.common.exception.BusinessException;
 import com.example.board.common.exception.EntityNotFoundException;
 
@@ -20,11 +17,10 @@ public class CommentDomainService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
-
-    public void validateCommentCreation(PostId postId, UserId authorId) {
+    public void validateCommentCreation(Long postId, Long authorId) {
         // 게시글 존재 여부 및 댓글 작성 가능 상태 확인
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new EntityNotFoundException("Post", postId.getValue()));
+                .orElseThrow(() -> new EntityNotFoundException("Post", postId.toString()));
 
         if (!post.canView()) {
             throw new BusinessException("Cannot comment on this post");
@@ -35,10 +31,10 @@ public class CommentDomainService {
         }
     }
 
-    public void validateReplyCreation(CommentId parentCommentId, PostId postId) {
+    public void validateReplyCreation(Long parentCommentId, Long postId) {
         // 부모 댓글 존재 여부 확인
         Comment parentComment = commentRepository.findById(parentCommentId)
-                .orElseThrow(() -> new EntityNotFoundException("Comment", parentCommentId.getValue()));
+                .orElseThrow(() -> new EntityNotFoundException("Comment", parentCommentId.toString()));
 
         // 같은 게시글의 댓글인지 확인
         if (!parentComment.getPostId().equals(postId)) {
@@ -56,7 +52,7 @@ public class CommentDomainService {
         }
     }
 
-    public void validateCommentEdit(Comment comment, UserId userId, boolean isAdmin) {
+    public void validateCommentEdit(Comment comment, Long userId, boolean isAdmin) {
         // 삭제된 댓글 확인
         if (comment.isDeleted()) {
             throw new BusinessException("Cannot edit deleted comment");
@@ -73,7 +69,7 @@ public class CommentDomainService {
         }
     }
 
-    public void validateCommentDeletion(Comment comment, UserId userId, boolean isAdmin) {
+    public void validateCommentDeletion(Comment comment, Long userId, boolean isAdmin) {
         // 이미 삭제된 댓글 확인
         if (comment.isDeleted()) {
             throw new BusinessException("Comment is already deleted");

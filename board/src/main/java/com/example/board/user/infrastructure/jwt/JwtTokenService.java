@@ -1,9 +1,11 @@
 package com.example.board.user.infrastructure.jwt;
 
-import com.example.board.user.domain.model.*;
-import com.example.board.user.domain.service.TokenService;
+import com.example.board.user.domain.User;
+import com.example.board.user.domain.AccessToken;
+
 import com.example.board.common.exception.BusinessException;
 
+import com.example.board.user.domain.service.TokenService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -38,12 +40,12 @@ public class JwtTokenService implements TokenService {
         Date expirationDate = Date.from(expiresAt.atZone(ZoneId.systemDefault()).toInstant());
 
         String tokenValue = Jwts.builder()
-                .setSubject(user.getUserId().getValue())
+                .setSubject(user.getId().toString())  // Long → String
                 .setIssuedAt(new Date())
                 .setExpiration(expirationDate)
-                .claim("email", user.getEmail().getValue())
+                .claim("email", user.getEmail())
                 .claim("username", user.getUsername())
-                .claim("role", "ROLE_" + user.getRole().name()) // Spring Security 표준 형태
+                .claim("role", "ROLE_" + user.getRole().name())
                 .claim("active", user.isActive())
                 .claim("type", "ACCESS")
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -66,18 +68,16 @@ public class JwtTokenService implements TokenService {
         }
     }
 
-    // 토큰에서 사용자 ID 추출 (DB 조회 없음)
-    public String extractUserId(String tokenValue) {
+    public Long extractUserId(String tokenValue) {
         try {
             Claims claims = parseToken(tokenValue);
-            return claims.getSubject();
+            return Long.parseLong(claims.getSubject());
         } catch (Exception e) {
             log.error("Failed to extract user ID from token: {}", e.getMessage());
             throw new BusinessException("토큰에서 사용자 정보를 추출할 수 없습니다");
         }
     }
 
-    // 토큰에서 사용자명 추출 (DB 조회 없음)
     public String extractUsername(String tokenValue) {
         try {
             Claims claims = parseToken(tokenValue);
@@ -88,7 +88,6 @@ public class JwtTokenService implements TokenService {
         }
     }
 
-    // 토큰에서 이메일 추출 (DB 조회 없음)
     public String extractEmail(String tokenValue) {
         try {
             Claims claims = parseToken(tokenValue);
@@ -99,7 +98,6 @@ public class JwtTokenService implements TokenService {
         }
     }
 
-    // 토큰에서 권한 추출 (DB 조회 없음)
     public Collection<SimpleGrantedAuthority> extractAuthorities(String tokenValue) {
         try {
             Claims claims = parseToken(tokenValue);
@@ -111,7 +109,6 @@ public class JwtTokenService implements TokenService {
         }
     }
 
-    // 토큰에서 활성 상태 확인 (DB 조회 없음)
     public boolean isUserActiveFromToken(String tokenValue) {
         try {
             Claims claims = parseToken(tokenValue);
@@ -123,8 +120,8 @@ public class JwtTokenService implements TokenService {
     }
 
     @Override
-    public UserId extractUserIdFromAccessToken(String tokenValue) {
-        return UserId.of(extractUserId(tokenValue));
+    public Long extractUserIdFromAccessToken(String tokenValue) {
+        return extractUserId(tokenValue);
     }
 
     private Claims parseToken(String tokenValue) {

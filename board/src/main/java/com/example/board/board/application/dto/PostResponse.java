@@ -1,15 +1,15 @@
 package com.example.board.board.application.dto;
 
-import com.example.board.board.domain.model.Post;
-import com.example.board.board.domain.model.PostStatus;
+import com.example.board.board.domain.Post;
+import com.example.board.board.domain.PostStatus;
 import java.time.LocalDateTime;
 
 public record PostResponse(
-        String postId,
-        String boardId,
+        Long postId,           // String → Long
+        Long boardId,          // String → Long
         String title,
         String content,
-        String authorId,
+        Long authorId,         // String → Long
         String authorName,
         PostStatus status,
         int viewCount,
@@ -18,11 +18,11 @@ public record PostResponse(
 ) {
     public static PostResponse from(Post post, String authorName) {
         return new PostResponse(
-                post.getPostId().getValue(),
-                post.getBoardId().getValue(),
-                post.getTitle().getValue(),
-                post.getContent().getValue(),
-                post.getAuthorId().getValue(),
+                post.getId(),
+                post.getBoardId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getAuthorId(),
                 authorName,
                 post.getStatus(),
                 post.getViewCount(),

@@ -1,6 +1,6 @@
 package com.example.board.user.application.dto;
 
-import com.example.board.user.domain.model.AccessToken;
+import com.example.board.user.domain.AccessToken;
 import java.time.LocalDateTime;
 
 public record LoginResponse(

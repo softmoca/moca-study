@@ -1,11 +1,11 @@
 package com.example.board.user.application.dto;
 
-import com.example.board.user.domain.model.User;
-import com.example.board.user.domain.model.UserRole;
+import com.example.board.user.domain.User;
+import com.example.board.user.domain.UserRole;
 import java.time.LocalDateTime;
 
 public record UserResponse(
-        String userId,
+        Long userId,           // String → Long 변경
         String email,
         String username,
         UserRole role,
@@ -14,8 +14,8 @@ public record UserResponse(
 ) {
     public static UserResponse from(User user) {
         return new UserResponse(
-                user.getUserId().getValue(),
-                user.getEmail().getValue(),
+                user.getId(),
+                user.getEmail(),
                 user.getUsername(),
                 user.getRole(),
                 user.getCreatedAt(),

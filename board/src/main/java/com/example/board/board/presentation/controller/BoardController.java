@@ -38,8 +38,8 @@ public class BoardController implements BoardApi {
     }
 
     @GetMapping("/{boardId}")
-    public ResponseEntity<BoardResponse> getBoard(@PathVariable String boardId) {
-        BoardResponse response = boardApplicationService.getBoard(boardId);
+    public ResponseEntity<BoardResponse> getBoard(@PathVariable Long boardId) {
+        BoardResponse response = boardApplicationService.getBoard(boardId.toString());
         return ResponseEntity.ok(response);
     }
 }

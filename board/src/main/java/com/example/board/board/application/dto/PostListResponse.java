@@ -3,7 +3,7 @@ package com.example.board.board.application.dto;
 import java.time.LocalDateTime;
 
 public record PostListResponse(
-        String postId,
+        Long postId,      // String → Long
         String title,
         String authorName,
         int viewCount,

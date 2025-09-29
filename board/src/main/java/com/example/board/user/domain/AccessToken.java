@@ -1,5 +1,5 @@
 // AccessToken.java - JWT 액세스 토큰 Value Object
-package com.example.board.user.domain.model;
+package com.example.board.user.domain;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

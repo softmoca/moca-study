@@ -1,8 +1,7 @@
 package com.example.board.user.domain.service;
 
-import com.example.board.user.domain.model.User;
-import com.example.board.user.domain.model.Email;
-import com.example.board.user.domain.repository.UserRepository;
+import com.example.board.user.domain.User;
+import com.example.board.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +11,7 @@ public class UserDomainService {
 
     private final UserRepository userRepository;
 
-
-    public boolean isEmailAvailable(Email email) {
+    public boolean isEmailAvailable(String email) {
         return !userRepository.existsByEmail(email);
     }
 
@@ -21,9 +19,9 @@ public class UserDomainService {
         return !userRepository.existsByUsername(username);
     }
 
-    public void validateUserForRegistration(String username, Email email) {
+    public void validateUserForRegistration(String username, String email) {
         if (!isEmailAvailable(email)) {
-            throw new IllegalArgumentException("Email already exists: " + email.getValue());
+            throw new IllegalArgumentException("Email already exists: " + email);
         }
 
         if (!isUsernameAvailable(username)) {

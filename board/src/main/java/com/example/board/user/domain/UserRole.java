@@ -1,4 +1,4 @@
-package com.example.board.user.domain.model;
+package com.example.board.user.domain;
 
 public enum UserRole {
     ADMIN("관리자"),

@@ -1,23 +1,23 @@
 package com.example.board.board.application.dto;
 
-import com.example.board.board.domain.model.Board;
+import com.example.board.board.domain.Board;
 import java.time.LocalDateTime;
 
 public record BoardResponse(
-        String boardId,
+        Long boardId,           // String → Long 변경
         String name,
         String description,
-        String createdBy,
+        Long createdBy,         // String → Long 변경
         LocalDateTime createdAt,
         boolean active,
         long postCount
 ) {
     public static BoardResponse from(Board board, long postCount) {
         return new BoardResponse(
-                board.getBoardId().getValue(),
+                board.getId(),
                 board.getName(),
                 board.getDescription(),
-                board.getCreatedBy().getValue(),
+                board.getCreatedBy(),
                 board.getCreatedAt(),
                 board.isActive(),
                 postCount

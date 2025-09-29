@@ -1,4 +1,3 @@
-// 업데이트된 CommentController.java (@CurrentUser 사용)
 package com.example.board.comment.presentation.controller;
 
 import com.example.board.comment.application.dto.CommentCreateRequest;
@@ -33,24 +32,25 @@ public class CommentController implements CommentApi {
 
     @PutMapping("/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(
-            @PathVariable String commentId,
+            @PathVariable Long commentId,
             @Valid @RequestBody CommentUpdateRequest request,
             @CurrentUser String userId) {
-        CommentResponse response = commentApplicationService.updateComment(commentId, request, userId);
+        CommentResponse response = commentApplicationService.updateComment(
+                commentId.toString(), request, userId);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
-            @PathVariable String commentId,
+            @PathVariable Long commentId,
             @CurrentUser String userId) {
-        commentApplicationService.deleteComment(commentId, userId);
+        commentApplicationService.deleteComment(commentId.toString(), userId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<List<CommentResponse>> getCommentsByPost(@PathVariable String postId) {
-        List<CommentResponse> responses = commentApplicationService.getCommentsByPost(postId);
+    public ResponseEntity<List<CommentResponse>> getCommentsByPost(@PathVariable Long postId) {
+        List<CommentResponse> responses = commentApplicationService.getCommentsByPost(postId.toString());
         return ResponseEntity.ok(responses);
     }
 }

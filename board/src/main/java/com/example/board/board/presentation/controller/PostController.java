@@ -30,35 +30,36 @@ public class PostController implements PostApi {
 
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse> getPost(
-            @PathVariable String postId,
+            @PathVariable Long postId,
             @CurrentUser String userId) {
-        PostResponse response = postApplicationService.getPost(postId, userId);
+        PostResponse response = postApplicationService.getPost(postId.toString(), userId);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{postId}")
     public ResponseEntity<PostResponse> updatePost(
-            @PathVariable String postId,
+            @PathVariable Long postId,
             @Valid @RequestBody PostUpdateRequest request,
             @CurrentUser String userId) {
-        PostResponse response = postApplicationService.updatePost(postId, request, userId);
+        PostResponse response = postApplicationService.updatePost(postId.toString(), request, userId);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
-            @PathVariable String postId,
+            @PathVariable Long postId,
             @CurrentUser String userId) {
-        postApplicationService.deletePost(postId, userId);
+        postApplicationService.deletePost(postId.toString(), userId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public ResponseEntity<List<PostListResponse>> getPostsByBoard(
-            @RequestParam String boardId,
+            @RequestParam Long boardId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<PostListResponse> responses = postApplicationService.getPostsByBoard(boardId, page, size);
+        List<PostListResponse> responses = postApplicationService.getPostsByBoard(
+                boardId.toString(), page, size);
         return ResponseEntity.ok(responses);
     }
 

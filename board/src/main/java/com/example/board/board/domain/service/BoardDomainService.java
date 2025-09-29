@@ -1,6 +1,6 @@
 package com.example.board.board.domain.service;
 
-import com.example.board.board.domain.repository.BoardRepository;
+import com.example.board.board.repository.BoardRepository;
 import com.example.board.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

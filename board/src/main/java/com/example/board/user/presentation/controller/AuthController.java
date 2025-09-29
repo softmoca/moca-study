@@ -4,7 +4,6 @@ import com.example.board.user.application.dto.*;
 import com.example.board.user.application.service.AuthenticationService;
 import com.example.board.user.infrastructure.security.JwtUserPrincipal;
 import com.example.board.user.domain.service.TokenDomainService;
-import com.example.board.user.domain.model.UserId;
 
 import com.example.board.user.presentation.api.AuthApi;
 import org.springframework.http.ResponseEntity;
@@ -28,16 +27,14 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal JwtUserPrincipal principal) {
-
         UserResponse response = new UserResponse(
                 principal.getUserId(),
                 principal.getEmail(),
                 principal.getUsername(),
-                null, // 역할 정보는 토큰에서 추출하지 않음 (필요시 추가 가능)
-                null, // 생성일시는 토큰에 없음
+                null,
+                null,
                 principal.isActive()
         );
         return ResponseEntity.ok(response);
@@ -45,8 +42,7 @@ public class AuthController implements AuthApi {
 
     @GetMapping("/me/full")
     public ResponseEntity<UserResponse> getCurrentUserFull(@AuthenticationPrincipal JwtUserPrincipal principal) {
-        // 최신 사용자 정보가 필요한 경우 DB 조회
-        var user = tokenDomainService.getUserById(UserId.of(principal.getUserId()));
+        var user = tokenDomainService.getUserById(principal.getUserId());
         UserResponse response = UserResponse.from(user);
         return ResponseEntity.ok(response);
     }

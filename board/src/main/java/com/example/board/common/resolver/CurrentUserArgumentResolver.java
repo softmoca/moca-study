@@ -1,4 +1,3 @@
-// 개선된 CurrentUserArgumentResolver.java - JwtUserPrincipal 사용
 package com.example.board.common.resolver;
 
 import com.example.board.common.annotation.CurrentUser;
@@ -31,10 +30,9 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 
         if (authentication != null && authentication.getPrincipal() instanceof JwtUserPrincipal) {
             JwtUserPrincipal principal = (JwtUserPrincipal) authentication.getPrincipal();
-            return principal.getUserId();
+            return principal.getUserId().toString();  // Long → String
         }
 
-        // 폴백: request attribute에서 가져오기
         String userId = (String) webRequest.getAttribute("userId", NativeWebRequest.SCOPE_REQUEST);
         return userId;
     }

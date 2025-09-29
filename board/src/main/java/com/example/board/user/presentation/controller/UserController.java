@@ -3,8 +3,8 @@ package com.example.board.user.presentation.controller;
 import com.example.board.user.application.dto.UserCreateRequest;
 import com.example.board.user.application.dto.UserResponse;
 import com.example.board.user.application.service.UserApplicationService;
-
 import com.example.board.user.presentation.api.UserApi;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +28,8 @@ public class UserController implements UserApi {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable String userId) {
-        UserResponse response = userApplicationService.findById(userId);
+    public ResponseEntity<UserResponse> getUser(@PathVariable Long userId) {
+        UserResponse response = userApplicationService.findById(userId.toString());
         return ResponseEntity.ok(response);
     }
 }
-

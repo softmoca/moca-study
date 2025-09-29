@@ -32,18 +32,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // 1. Authorization 헤더에서 JWT 토큰 추출
         String accessToken = extractTokenFromRequest(request);
 
         if (StringUtils.hasText(accessToken) && jwtTokenService.validateAccessToken(accessToken)) {
-            // 2. 토큰에서 직접 정보 추출 (DB 조회 없음)
-            String userId = jwtTokenService.extractUserId(accessToken);
+            Long userId = jwtTokenService.extractUserId(accessToken);
             String username = jwtTokenService.extractUsername(accessToken);
             String email = jwtTokenService.extractEmail(accessToken);
             boolean active = jwtTokenService.isUserActiveFromToken(accessToken);
             Collection<SimpleGrantedAuthority> authorities = jwtTokenService.extractAuthorities(accessToken);
 
-            // 3. 경량화된 Principal 객체 생성
             JwtUserPrincipal principal = new JwtUserPrincipal(userId, username, email, active);
 
             UsernamePasswordAuthenticationToken authentication =
@@ -53,7 +50,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             log.debug("JWT authentication successful for user: {}", username);
         }
-        // 예외 처리는 JwtExceptionFilter에서 담당
 
         filterChain.doFilter(request, response);
     }
@@ -72,7 +68,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
 
-        // 인증이 필요 없는 경로들 (refresh 경로 제거)
         return path.startsWith("/api/auth/login") ||
                 path.equals("/api/users") ||
                 path.startsWith("/api/public/") ||
