@@ -4,7 +4,9 @@ import com.example.board.board.infrastructure.entity.PostEntity;
 import com.example.board.board.infrastructure.entity.PostEntityStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,4 +31,9 @@ interface PostJpaRepository extends JpaRepository<PostEntity, Long> {
 
     long countByBoardPublicId(String boardPublicId);
     long countByAuthorPublicId(String authorPublicId);
+
+    @Modifying
+    @Query("UPDATE PostEntity p SET p.viewCount = p.viewCount + 1 WHERE p.publicId = :postId")
+    int incrementViewCount(@Param("postId") String postId);
+
 }

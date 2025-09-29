@@ -6,6 +6,7 @@ import com.example.board.user.infrastructure.security.JwtExceptionFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -43,7 +44,7 @@ public class SecurityConfig {
                 // 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // 인증이 필요 없는 엔드포인트들
-                        .requestMatchers("/api/auth/login").permitAll() // refresh 엔드포인트 제거
+                        .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/users").permitAll() // 회원가입
 
                         // Swagger 관련 경로들 모두 허용
@@ -58,9 +59,17 @@ public class SecurityConfig {
                                 "/swagger-ui/index.html"
                         ).permitAll()
 
+                        // 게시판 관련 - 조회는 누구나, 생성은 관리자만
+                        .requestMatchers(HttpMethod.GET, "/api/boards/**").permitAll() // 🔥 이 줄 추가!
+                        .requestMatchers(HttpMethod.POST, "/api/boards").hasRole("ADMIN") // 게시판 생성은 관리자만
+
+                        // 게시글 관련 - 조회는 누구나, 나머지는 인증 필요
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll() // 🔥 이 줄도 추가!
+
+
                         // 관리자 권한이 필요한 엔드포인트들
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/boards").hasRole("ADMIN") // 게시판 생성은 관리자만
+
 
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()

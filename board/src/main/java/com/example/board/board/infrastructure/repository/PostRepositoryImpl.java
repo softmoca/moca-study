@@ -90,4 +90,9 @@ public class PostRepositoryImpl implements PostRepository {
     public long countByAuthorId(UserId authorId) {
         return jpaRepository.countByAuthorPublicId(authorId.getValue());
     }
+    @Override
+    public int incrementViewCount(String postId) {
+        return jpaRepository.incrementViewCount(postId);
+    }
+
 }

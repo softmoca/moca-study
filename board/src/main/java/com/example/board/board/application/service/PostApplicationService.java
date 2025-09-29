@@ -13,6 +13,7 @@ import com.example.board.common.exception.EntityNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -86,7 +87,7 @@ public class PostApplicationService implements CreatePostUseCase, UpdatePostUseC
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional()
     public PostResponse getPost(String postId, String viewerId) {
         // 게시글 조회
         Post post = postRepository.findById(PostId.of(postId))
@@ -105,17 +106,34 @@ public class PostApplicationService implements CreatePostUseCase, UpdatePostUseC
             throw new BusinessException("게시글 조회 권한이 없습니다");
         }
 
-        // 조회수 증가 (작성자가 아닌 경우만)
-        if (viewerIdObj == null || !post.isAuthor(viewerIdObj)) {
-            post.increaseViewCount();
-            postRepository.save(post);
+        // 조회수 증가는 별도 트랜잭션으로 처리 (작성자가 아닌 경우만)
+        boolean shouldIncreaseViewCount = (viewerIdObj == null || !post.isAuthor(viewerIdObj));
+        if (shouldIncreaseViewCount) {
+            // 비동기적으로 조회수 증가 (읽기 트랜잭션과 분리)
+            increaseViewCountAsync(postId);
         }
-
         // 작성자 정보 조회
         User author = userRepository.findById(post.getAuthorId())
                 .orElseThrow(() -> new EntityNotFoundException("User", post.getAuthorId().getValue()));
 
         return PostResponse.from(post, author.getUsername());
+    }
+    /**
+     * 조회수 증가 (별도 트랜잭션, 새로운 트랜잭션으로 실행)
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void increaseViewCountAsync(String postId) {
+        try {
+            // 엔티티 조회 없이 직접 UPDATE
+            int updatedRows = postRepository.incrementViewCount(postId);
+
+            if (updatedRows == 0) {
+                System.err.println("No post found to update view count for postId: " + postId);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Failed to increase view count for post: " + postId + ", error: " + e.getMessage());
+        }
     }
 
     public void deletePost(String postId, String userId) {
