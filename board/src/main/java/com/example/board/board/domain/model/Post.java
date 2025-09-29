@@ -16,7 +16,7 @@ public class Post {
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // 생성자 - 새로운 게시글 생성
+    // 생성자 - 새로운 게시글 생성d
     public Post(BoardId boardId, Title title, Content content, UserId authorId) {
         this.postId = PostId.generate();
         this.boardId = Objects.requireNonNull(boardId);
